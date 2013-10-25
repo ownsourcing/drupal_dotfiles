@@ -1,0 +1,9 @@
+# Create a new directory and enter it
+function mkd() {
+  mkdir -p "$@" && cd "$@"
+}
+
+# Go to Drupal root
+function cd_drupal_7_site() {
+  cd $DRUPAL_ROOT/Sites/$1
+}

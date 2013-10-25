@@ -1,0 +1,11 @@
+[user]
+  name = Willem Bressers
+  email = info@willembressers.nl
+[core]
+  excludesfile = ~/.gitignore
+  attributesfile = ~/.gitattributes
+  whitespace = space-before-tab,indent-with-non-tab,trailing-space
+[color]
+  ui = true
+[merge]
+  log = true
