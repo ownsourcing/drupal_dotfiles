@@ -8,15 +8,17 @@ This repository is intended for OS X users only and sets your [dotfiles], so tha
 [Drupal]: https://drupal.org/
 
 
-## Installation
+## Installation / update
 
-### Using Git and the bootstrap script
+### Install
 
 You can clone the repository wherever you want. (I like to keep it in `~/Projects/drupal_dotfiles`, with `~/drupal_dotfiles` as a symlink.) The bootstrapper script will pull in the latest version and copy the files to your home folder.
 
 ```bash
 git clone https://github.com/willembressers/drupal_dotfiles.git && cd drupal_dotfiles && source bootstrap.sh
 ```
+
+### Update
 
 To update, `cd` into your local `drupal_dotfiles` repository and then:
 
@@ -28,6 +30,7 @@ Alternatively, to update while avoiding the confirmation prompt:
 
 ```bash
 set -- -f; source bootstrap.sh
+```
 
 ## Configuration
 
