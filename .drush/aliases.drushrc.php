@@ -1,7 +1,7 @@
 <?php
 
 $aliases = array();
-$drupal_root = $_ENV["DRUPAL_ROOT"];
+$drupal_root = $_SERVER["DRUPAL_ROOT"];
 
 // Automatic alias for each Drupal site
 $site = new DirectoryIterator($drupal_root . '/sites');
@@ -12,13 +12,13 @@ while ($site->valid()) {
       // Add site alias
       $basename = $site->getBasename();
 
-      // Local alias
+      // Development (local) stage.
       $aliases[$basename] = array(
         'uri' => $basename,
         'root' => $drupal_root,
         'command-specific' => array(
           'dl' => array(
-            'destination' => 'sites/' . $entry . '/modules/contrib'
+            'destination' => 'sites/' . $basename . '/modules/contrib'
           )
         ),
         '#test' => '@' . $basename . '_t',
@@ -26,20 +26,30 @@ while ($site->valid()) {
         '#prod' => '@' . $basename . '_p',
       );
 
-      // Test alias
-      // $aliases[$basename . '_t'] = array();
+      // Testing stage.
+      // $aliases[$basename . '_t'] = array(
+          // '#dev' => '@' . $basename,
+          // '#acc' => '@' . $basename . '_a',
+          // '#prod' => '@' . $basename . '_p',
+      // );
 
-      // Acceptance alias
-      // $aliases[$basename . '_t'] = array();
+      // Acceptance stage.
+      // $aliases[$basename . '_a'] = array(
+          // '#dev' => '@' . $basename,
+          // '#test' => '@' . $basename . '_t',
+          // '#prod' => '@' . $basename . '_p',
+      // );
 
-      // Production alias
-      // $aliases[$basename . '_t'] = array();
+      // Production stage.
+      // $aliases[$basename . '_p'] = array(
+          // '#dev' => '@' . $basename,
+          // '#test' => '@' . $basename . '_t',
+          // '#acc' => '@' . $basename . '_a',
+      // );
     }
   }
   $site->next();
 }
-
-// =============================================================================
 
 // Get all site aliases
 $all = array();

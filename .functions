@@ -5,5 +5,10 @@ function mkd() {
 
 # Go to Drupal root
 function cd_drupal_7_site() {
-  cd $DRUPAL_ROOT/Sites/$1
+  cd $DRUPAL_ROOT/sites/$1
+}
+
+# Drush download and enable project
+function drush_download_enable() {
+  drush dl $1 && drush en $1 -y
 }
