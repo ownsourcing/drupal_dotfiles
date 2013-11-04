@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 
 # Source the shell dotfiles
 for file in ~/.{path,bash_prompt,exports,aliases,functions,extra}; do
@@ -5,3 +6,4 @@ for file in ~/.{path,bash_prompt,exports,aliases,functions,extra}; do
 done
 unset file
 
+PS1="\W"

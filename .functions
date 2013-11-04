@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 # Create a new directory and enter it
 function mkd() {
   mkdir -p "$@" && cd "$@"
@@ -5,10 +7,39 @@ function mkd() {
 
 # Go to Drupal root
 function cd_drupal_7_site() {
-  cd $DRUPAL_ROOT/sites/$1
+  if [[ -z "$1" ]]; then
+    echo -e "\033[1;31mError: provide multisite.\033[0m"
+  else
+    cd $DRUPAL_ROOT/sites/$1
+  fi
 }
 
 # Drush download and enable project
 function drush_download_enable() {
-  drush dl $1 && drush en $1 -y
+  if [[ -z "$1" ]]; then
+    echo -e "\033[1;31mError: provide drush alias.\033[0m"
+  else
+    drush dl $1 && drush en $1 -y
+  fi
+}
+
+function sync_drupal_database () {
+  if [[ -z "$1" ]]; then
+    echo -e "\033[1;31mError: provide drush alias.\033[0m"
+  else
+    echo -e "\n\033[0;32mSyncing the ($1) database\033[0m";
+    drush sql-sync @$1_t @$1 -y
+
+    echo -e "\n\033[0;32mEnable developer modules\033[0m";
+    drush en @$1 devel potx -y
+  fi
+}
+
+function sync_drupal_files () {
+  if [[ -z "$1" ]]; then
+    echo -e "\033[1;31mError: provide drush alias.\033[0m"
+  else
+    echo -e "\n\033[0;32mSyncing the ($1) files\033[0m"
+    # drush -y rsync @$1_t:%files @$1:%files
+  fi
 }

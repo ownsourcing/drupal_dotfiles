@@ -38,6 +38,9 @@ Thumbs.db
 files/
 settings.php
 
+# Drupal modules
+potx
+
 # Sublime text
 *.sublime-project
 *.sublime-workspace

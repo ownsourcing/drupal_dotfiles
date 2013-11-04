@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 # Easier navigation: .., ..., ...., ....., ~ and -
 alias ..="cd .."
 alias ...="cd ../.."
@@ -19,3 +21,8 @@ alias oo="open ."
 # Drupal
 alias d7=cd_drupal_7_site
 alias de=drush_download_enable
+alias sdb=sync_drupal_database
+alias sf=sync_drupal_files
+
+# Drush
+alias wipe="drush wipe"
