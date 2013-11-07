@@ -5,8 +5,6 @@ alias ..="cd .."
 alias ...="cd ../.."
 alias ....="cd ../../.."
 alias .....="cd ../../../.."
-alias ~="cd ~" # `cd` is probably faster to type though
-alias -- -="cd -"
 
 # Shortcuts
 alias dl="cd ~/Downloads"
@@ -23,6 +21,9 @@ alias d7=cd_drupal_7_site
 alias de=drush_download_enable
 alias sdb=sync_drupal_database
 alias sf=sync_drupal_files
+alias en=drush_download_enable
+alias dis=drush_disable_uninstall
+alias ns=new_multisite
 
 # Drush
 alias wipe="drush wipe"

@@ -1,5 +1,6 @@
 [user]
   name = Willem Bressers
+  email = info@willembressers.nl
 [core]
   excludesfile = ~/.gitignore
   attributesfile = ~/.gitattributes

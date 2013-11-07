@@ -24,3 +24,5 @@ export LSCOLORS=ExFxCxDxBxegedabagacad
 
 # Make our shell variable available for php
 export DRUPAL_ROOT
+
+export PS1='\w$ '

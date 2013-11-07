@@ -38,8 +38,12 @@ Thumbs.db
 files/
 settings.php
 
-# Drupal modules
+# Drupal development modules
+devel
 potx
+coder
+search_krumo
+FirePHPCore
 
 # Sublime text
 *.sublime-project
