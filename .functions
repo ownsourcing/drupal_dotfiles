@@ -10,94 +10,111 @@ function cd_drupal_7_site() {
 }
 
 # Drush download and enable project
-function drush_download_enable() {
+function download_and_enable_project() {
   if [[ -z "$1" ]]; then
-    echo -e "\033[1;31mError: provide drush alias.\033[0m"
-  else
-    cd $DRUPAL_ROOT/sites/$1
-
-    drush dl $1 && drush en $1 -y
+    echo -en "\n\033[0;32mEnter module / theme name\033[0m: "; read project
   fi
+  project=${project:-$1}
+  echo -e "\n\033[0;32mDownload and enable: \033[0m$project"
+  drush dl $project -y && drush en $project -y
 }
 
 # Drush disable and uninstall project
-function drush_disable_uninstall() {
+function disable_and_uninstall_project() {
   if [[ -z "$1" ]]; then
-    echo -e "\033[1;31mError: provide drush alias.\033[0m"
-  else
-    cd $DRUPAL_ROOT/sites/$1
-
-    drush dis $1 && drush pm-uninstall $1 -y
+    echo -en "\n\033[0;32mEnter module / theme name\033[0m: "; read project
   fi
+  project=${project:-$1}
+  echo -e "\n\033[0;32mDisable and uninstall: \033[0m$project"
+  drush dis $project -y && drush pm-uninstall $project -y
 }
 
-# Syncs the test database into local.
-function sync_drupal_database () {
+# Drush disable and uninstall project
+function simpletest_project() {
   if [[ -z "$1" ]]; then
-    echo -e "\033[1;31mError: provide drush alias.\033[0m"
-  else
-    cd $DRUPAL_ROOT/sites/$1
-
-    echo -e "\n\033[0;32mSyncing the ($1) database\033[0m"
-    drush sql-sync @$1_t @$1 -y
-
-    echo -e "\n\033[0;32mDrush action\033[0m"
-    drush wd-del all -y && drush fra -y && drush updb -y && drush cc all
-
-    echo -e "\n\033[0;32mAlter the configuration\033[0m"
-    drush vset site_mail "$1+site+$EMAIL" && drush sqlq "update users set mail='$1+root+$EMAIL' where users.uid =1"
-
-    echo -e "\n\033[0;32mEnable developer modules\033[0m"
-    drush en devel devel_generate potx coder update statistics simpletest search_krumo -y
-
-    echo -e "\n\033[0;32mGenerate dummy content\033[0m"
-    drush generate-vocabs 10 && drush generate-users 10 && drush generate-content 200
+    echo -en "\n\033[0;32mEnter module / theme name\033[0m: "; read project
   fi
+  project=${project:-$1}
+  site="st_${project}"
+  echo -e "\n\033[0;32mSimpletest: \033[0m$project"
+
+  echo -e "\n\033[0;32mInstall Drupal:\033[0m"
+  mkdir -p $DRUPAL_ROOT/sites/$site && cd $DRUPAL_ROOT/sites/$site
+  drush site-install standard --db-url=mysql://$MYSQL_USER:$MYSQL_PASS@localhost/$site --site-name=$site --site-mail=root+$site+$EMAIL --account-mail=$site+$EMAIL --account-name=$MYSQL_USER --account-pass=$MYSQL_PASS -y
+  mkdir -p $DRUPAL_ROOT/sites/$site/{libraries,modules/{contrib,custom/$module,features},themes/$theme/templates,files/{public,private}} && chmod -R o+w $DRUPAL_ROOT/sites/$site/files && cd $DRUPAL_ROOT/sites/$site
+
+  echo -e "\n\033[0;32mConfigure Drupal:\033[0m"
+  drush vset file_public_path "sites/$site/files/public"
+  drush vset file_private_path "sites/$site/files/private"
+
+  echo -e "\n\033[0;32mInstall Drupal modules:\033[0m"
+  drush dl $project -y && drush en $project -y
+
+  echo -e "\n\033[0;32mAdd DNS entry:\033[0m"
+  # echo -e "127.0.0.1 ${site}.d7" >> /private/etc/hosts
+
+  echo -e "\n\033[0;32mOpen Safari:\033[0m"
+  open -a Safari http://$site.d7
 }
 
-# Syncs the test files to local.
-function sync_drupal_files () {
-  if [[ -z "$1" ]]; then
-    echo -e "\033[1;31mError: provide drush alias.\033[0m"
-  else
-    echo -e "\n\033[0;32mSyncing the ($1) files\033[0m"
-    drush -y rsync @$1_t:%files @$1:%files
-  fi
-}
+# # Syncs the test database into local.
+# function sync_drupal_database () {
+#   if [[ -z "$1" ]]; then
+#     echo -e "\033[1;31mError: provide drush alias.\033[0m"
+#   else
+#     cd $DRUPAL_ROOT/sites/$1
 
-# Downloads and enables an module
-function download_and_enable_project () {
-  if [[ -z "$1" ]]; then
-    echo -e "\033[1;31mError: provide project name.\033[0m"
-  else
-    drush dl $1 && drush en $1 -y
-  fi
-}
+#     echo -e "\n\033[0;32mSyncing the ($1) database\033[0m"
+#     drush sql-sync @$1_t @$1 -y
 
-# Create a new multisite.
-function new_multisite() {
-  if [[ -z "$1" ]]; then
-    echo -en "\n\033[0;32mEnter site name\033[0m: "; read site
-  fi
-  site=${site:-$1} && module="${site}_mod" && theme="${site}_the"
-  echo -e "\n\033[0;32mNew (\033[0m$site\033[0;32m) multisite\033[0m"
+#     echo -e "\n\033[0;32mDrush action\033[0m"
+#     drush wd-del all -y && drush fra -y && drush updb -y && drush cc all
 
-  echo -e "\n\033[0;32mCreate folder structure\033[0m"
-  mkdir -p $DRUPAL_ROOT/sites/$site/{libraries,modules/{contrib,custom/$module,features},themes/$theme/templates,files}
-  cp $DRUPAL_ROOT/sites/default/default.settings.php $DRUPAL_ROOT/sites/$site/settings.php
+#     echo -e "\n\033[0;32mAlter the configuration\033[0m"
+#     drush vset site_mail "$1+site+$EMAIL" && drush sqlq "update users set mail='$1+root+$EMAIL' where users.uid =1"
 
-  echo -e "\n\033[0;32mCreate custom module\033[0m"
-  echo -e "name = $module\ndescription = Custom hooks, callbacks and code.\ncore = 7.x\npackage = $site\n" >> $DRUPAL_ROOT/sites/$site/modules/custom/$module/$module.info
-  echo -e "<?php\n" >> $DRUPAL_ROOT/sites/$site/modules/custom/$module/$module.module
-  echo -e "<?php\n" >> $DRUPAL_ROOT/sites/$site/modules/custom/$module/$module.install
+#     echo -e "\n\033[0;32mEnable developer modules\033[0m"
+#     drush en devel devel_generate potx coder update statistics simpletest search_krumo -y
 
-  echo -e "\n\033[0;32mCreate custom theme\033[0m"
-  echo -e "name = $theme\ndescription = Custom $theme Theme\ncore = 7.x\n" >> $DRUPAL_ROOT/sites/$site/themes/$theme/$theme.info
-  echo -e "<?php\n" >> $DRUPAL_ROOT/sites/$site/themes/$theme/template.php
+#     echo -e "\n\033[0;32mGenerate dummy content\033[0m"
+#     drush generate-vocabs 10 && drush generate-users 10 && drush generate-content 200
+#   fi
+# }
 
-  echo -e "\n\033[0;32mCreate patches file\033[0m"
-  echo -e "" >> $DRUPAL_ROOT/sites/$site/PATCHES.txt
+# # Syncs the test files to local.
+# function sync_drupal_files () {
+#   if [[ -z "$1" ]]; then
+#     echo -e "\033[1;31mError: provide drush alias.\033[0m"
+#   else
+#     echo -e "\n\033[0;32mSyncing the ($1) files\033[0m"
+#     drush -y rsync @$1_t:%files @$1:%files
+#   fi
+# }
 
-  echo -e "\n\033[0;32mSet permissions\033[0m"
-  chmod o+w $DRUPAL_ROOT/sites/$site/settings.php && chmod o+w $DRUPAL_ROOT/sites/$site/files
-}
+# # Create a new multisite.
+# function new_multisite() {
+#   if [[ -z "$1" ]]; then
+#     echo -en "\n\033[0;32mEnter site name\033[0m: "; read site
+#   fi
+#   site=${site:-$1} && module="${site}_mod" && theme="${site}_the"
+#   echo -e "\n\033[0;32mNew (\033[0m$site\033[0;32m) multisite\033[0m"
+
+#   echo -e "\n\033[0;32mCreate folder structure\033[0m"
+#   mkdir -p $DRUPAL_ROOT/sites/$site/{libraries,modules/{contrib,custom/$module,features},themes/$theme/templates,files}
+#   cp $DRUPAL_ROOT/sites/default/default.settings.php $DRUPAL_ROOT/sites/$site/settings.php
+
+#   echo -e "\n\033[0;32mCreate custom module\033[0m"
+#   echo -e "name = $module\ndescription = Custom hooks, callbacks and code.\ncore = 7.x\npackage = $site\n" >> $DRUPAL_ROOT/sites/$site/modules/custom/$module/$module.info
+#   echo -e "<?php\n" >> $DRUPAL_ROOT/sites/$site/modules/custom/$module/$module.module
+#   echo -e "<?php\n" >> $DRUPAL_ROOT/sites/$site/modules/custom/$module/$module.install
+
+#   echo -e "\n\033[0;32mCreate custom theme\033[0m"
+#   echo -e "name = $theme\ndescription = Custom $theme Theme\ncore = 7.x\n" >> $DRUPAL_ROOT/sites/$site/themes/$theme/$theme.info
+#   echo -e "<?php\n" >> $DRUPAL_ROOT/sites/$site/themes/$theme/template.php
+
+#   echo -e "\n\033[0;32mCreate patches file\033[0m"
+#   echo -e "" >> $DRUPAL_ROOT/sites/$site/PATCHES.txt
+
+#   echo -e "\n\033[0;32mSet permissions\033[0m"
+#   chmod o+w $DRUPAL_ROOT/sites/$site/settings.php && chmod o+w $DRUPAL_ROOT/sites/$site/files
+# }

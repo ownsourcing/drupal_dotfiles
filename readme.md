@@ -41,9 +41,24 @@ Add an `.extra` file to your home folder where you can make it more personal.
 This file is ignored from the repository so that you can personalize your Terminal.
 
 ```bash
+#!/usr/bin/env bash
+
 # Define your Drupal root folder.
 DRUPAL_ROOT="$HOME/Sites/d7"
+MYSQL_USER="root"
+MYSQL_PASS="password"
+EMAIL="mail@example.com"
 ```
+## Usage
+
+### Aliasses
+
+Alias | Argument | Descriptions
+--- | --- | ---
+`d7` | *site folder* | cd into the Drupal root folder, argument is optional and cd into the multisite.
+`de` | *project* | Downloads and enables the project.
+`du` | *project* | Disables and uninstalls the project.
+`st` | *project* | Local simpletest, Creates multisite, downloads and enables the project, and opens it.
 
 ## Thanks to…
 
