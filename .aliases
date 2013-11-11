@@ -18,13 +18,11 @@ alias oo="open ."
 
 # Drupal
 alias d7=cd_drupal_7_site
-alias de=download_and_enable_project
-alias du=disable_and_uninstall_project
-alias st=simpletest_project
-# alias sdb=sync_drupal_database
-# alias sf=sync_drupal_files
-# alias en=drush_download_enable
-# alias ns=new_multisite
+alias as=add_multisite
+alias rs=remove_multisite
+alias ap=add_project
+alias rp=remove_project
+alias tp=simpletest_project
 
 # Drush
 alias wipe="drush wipe"

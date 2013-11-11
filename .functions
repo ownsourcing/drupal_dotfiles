@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-# Go to Drupal root
 function cd_drupal_7_site() {
   if [[ -z "$1" ]]; then
     cd $DRUPAL_ROOT/sites/
@@ -9,53 +8,92 @@ function cd_drupal_7_site() {
   fi
 }
 
-# Drush download and enable project
-function download_and_enable_project() {
-  if [[ -z "$1" ]]; then
-    echo -en "\n\033[0;32mEnter module / theme name\033[0m: "; read project
-  fi
-  project=${project:-$1}
-  echo -e "\n\033[0;32mDownload and enable: \033[0m$project"
-  drush dl $project -y && drush en $project -y
-}
-
-# Drush disable and uninstall project
-function disable_and_uninstall_project() {
-  if [[ -z "$1" ]]; then
-    echo -en "\n\033[0;32mEnter module / theme name\033[0m: "; read project
-  fi
-  project=${project:-$1}
-  echo -e "\n\033[0;32mDisable and uninstall: \033[0m$project"
-  drush dis $project -y && drush pm-uninstall $project -y
-}
-
-# Drush disable and uninstall project
 function simpletest_project() {
   if [[ -z "$1" ]]; then
     echo -en "\n\033[0;32mEnter module / theme name\033[0m: "; read project
   fi
-  project=${project:-$1}
-  site="st_${project}"
+  project=${1:-$project} && site="st_${project}"
   echo -e "\n\033[0;32mSimpletest: \033[0m$project"
 
-  echo -e "\n\033[0;32mInstall Drupal:\033[0m"
-  mkdir -p $DRUPAL_ROOT/sites/$site && cd $DRUPAL_ROOT/sites/$site
-  drush site-install standard --db-url=mysql://$MYSQL_USER:$MYSQL_PASS@localhost/$site --site-name=$site --site-mail=root+$site+$EMAIL --account-mail=$site+$EMAIL --account-name=$MYSQL_USER --account-pass=$MYSQL_PASS -y
-  mkdir -p $DRUPAL_ROOT/sites/$site/{libraries,modules/{contrib,custom/$module,features},themes/$theme/templates,files/{public,private}} && chmod -R o+w $DRUPAL_ROOT/sites/$site/files && cd $DRUPAL_ROOT/sites/$site
-
-  echo -e "\n\033[0;32mConfigure Drupal:\033[0m"
-  drush vset file_public_path "sites/$site/files/public"
-  drush vset file_private_path "sites/$site/files/private"
-
-  echo -e "\n\033[0;32mInstall Drupal modules:\033[0m"
-  drush dl $project -y && drush en $project -y
-
-  echo -e "\n\033[0;32mAdd DNS entry:\033[0m"
-  # echo -e "127.0.0.1 ${site}.d7" >> /private/etc/hosts
+  add_multisite $site false
+  add_project $site $project
 
   echo -e "\n\033[0;32mOpen Safari:\033[0m"
   open -a Safari http://$site.d7
 }
+
+function add_multisite() {
+  if [[ -z "$1" ]]; then
+    echo -en "\n\033[0;32mEnter site name\033[0m: "; read site
+  fi
+  site=${1:-$site}
+  open_safari=${2:-true}
+  if [ ! -d "$DRUPAL_ROOT/sites/$site" ]; then
+    echo -e "\n\033[0;32mAdd multisite:\033[0m"
+    cd $DRUPAL_ROOT/sites
+    mkdir -p $DRUPAL_ROOT/sites/$site/{libraries,modules/{contrib,custom/$module,features},themes/$theme/templates,files/{public,private}} && chmod -R o+w $DRUPAL_ROOT/sites/$site/files
+    drush si standard --db-url=mysql://$MYSQL_USER:$MYSQL_PASS@localhost/$site --site-name=$site --site-mail=root+$site+$EMAIL --account-mail=$site+$EMAIL --account-name=$MYSQL_USER --account-pass=$MYSQL_PASS --sites-subdir=$site -y
+
+    echo -e "\n\033[0;32mConfigure multisite:\033[0m"
+    cd $DRUPAL_ROOT/sites/$site
+    drush vset file_public_path "sites/$site/files/public"
+    drush vset file_private_path "sites/$site/files/private"
+
+    echo -e "\n\033[0;32mAdd DNS entry:\033[0m"
+    sudo sed -ie "\|^127.0.0.1 ${site}.d7|d" /private/etc/hosts && echo -e "127.0.0.1 ${site}.d7" >> /private/etc/hosts
+
+    if [ open_safari ]; then
+      echo -e "\n\033[0;32mOpen Safari:\033[0m"
+      open -a Safari http://$site.d7
+    fi
+  fi
+}
+
+function remove_multisite() {
+  if [[ -z "$1" ]]; then
+    echo -en "\n\033[0;32mEnter site name\033[0m: "; read site
+  fi
+  site=${1:-$site}
+  if [ -d "$DRUPAL_ROOT/sites/$site" ]; then
+    echo -e "\n\033[0;32mRemove Drupal multisite:\033[0m"
+    cd $DRUPAL_ROOT/sites/$site
+    drush sql-drop -y && sudo rm -rf $DRUPAL_ROOT/sites/$site && cd $DRUPAL_ROOT/sites/
+
+    echo -e "\n\033[0;32mRemove DNS entry:\033[0m"
+    sudo sed -ie "\|^127.0.0.1 ${site}.d7|d" /private/etc/hosts
+  fi
+}
+
+function add_project() {
+  if [[ -z "$1" ]]; then
+    echo -en "\n\033[0;32mEnter site name\033[0m: "; read site
+  fi
+  site=${1:-$site}
+  if [[ -z "$2" ]]; then
+    echo -en "\n\033[0;32mEnter project name\033[0m: "; read project
+  fi
+  project=${2:-$project}
+  if [ ! -d "$DRUPAL_ROOT/sites/$site/modules/contrib/$project" ]; then
+    echo -e "\n\033[0;32mDownload and enable ($project) module:\033[0m"
+    cd $DRUPAL_ROOT/sites/$site && drush dl $project -y && drush en $project -y
+  fi
+}
+
+function remove_project() {
+  if [[ -z "$1" ]]; then
+    echo -en "\n\033[0;32mEnter site name\033[0m: "; read site
+  fi
+  site=${1:-$site}
+  if [[ -z "$2" ]]; then
+    echo -en "\n\033[0;32mEnter project name\033[0m: "; read project
+  fi
+  project=${2:-$project}
+  if [ -d "$DRUPAL_ROOT/sites/$site/modules/contrib/$project" ]; then
+    echo -e "\n\033[0;32mDisable and uninstall ($project) module:\033[0m"
+    cd $DRUPAL_ROOT/sites/$site && drush dis $project -y && drush pm-uninstall $project -y
+  fi
+}
+
 
 # # Syncs the test database into local.
 # function sync_drupal_database () {
