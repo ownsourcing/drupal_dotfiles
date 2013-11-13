@@ -16,13 +16,13 @@ alias v="vim"
 alias o="open"
 alias oo="open ."
 
-# Drupal
+# Drupal daily usage
 alias d7=cd_drupal_7_site
+alias gc=generate_content
+
+# Drupal multisite and projects
 alias as=add_multisite
 alias rs=remove_multisite
 alias ap=add_project
 alias rp=remove_project
 alias tp=simpletest_project
-
-# Drush
-alias wipe="drush wipe"

@@ -37,6 +37,7 @@ Thumbs.db
 # Drupal
 files/
 settings.php
+sites.php
 
 # Drupal development modules
 devel

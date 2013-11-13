@@ -94,6 +94,10 @@ function remove_project() {
   fi
 }
 
+function generate_content() {
+  drush en devel devel_generate -y
+  drush generate-vocabs 10 && drush generate-users 10 && drush generate-content 200
+}
 
 # # Syncs the test database into local.
 # function sync_drupal_database () {

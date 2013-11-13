@@ -34,9 +34,9 @@ set -- -f; source bootstrap.sh
 
 ## Configuration
 
-Add an `.extra` file to your home folder where you can make it more personal.
+Add an `.bash_extra` file to your home folder where you can make it more personal.
 
-### .extra ###
+### .bash_extra ###
 
 This file is ignored from the repository so that you can personalize your Terminal.
 
