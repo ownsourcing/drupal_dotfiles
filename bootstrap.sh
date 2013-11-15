@@ -1,12 +1,14 @@
 #!/usr/bin/env bash
 
-cd "$(dirname "${BASH_SOURCE}")"
+DOT_REPO="$(dirname "${BASH_SOURCE}")"
+
+cd $DOT_REPO
 git pull origin master
 
 # Copies all the files from the repo to the HOME folder.
 function doIt() {
-  rsync --exclude ".git/" --exclude ".DS_Store" --exclude "bootstrap.sh" \
-    --exclude "README.md" --exclude "LICENSE-MIT.txt" -av --no-perms . ~
+  rsync --exclude ".git/" --exclude ".DS_Store" --exclude "bootstrap.sh" --exclude "readme.md" -av --no-perms . ~
+
   source ~/.bash_profile
 }
 

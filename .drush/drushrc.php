@@ -75,7 +75,7 @@
 # $options['shell-aliases']['pull'] = '!git pull'; // We've all done it.
 # $options['shell-aliases']['pulldb'] = '!git pull && drush updatedb';
 # $options['shell-aliases']['noncore'] = 'pm-list --no-core';
-$options['shell-aliases']['wipe'] = 'cache-clear all';
+# $options['shell-aliases']['wipe'] = 'cache-clear all';
 # $options['shell-aliases']['unsuck'] = 'pm-disable -y overlay,dashboard';
 # $options['shell-aliases']['offline'] = 'variable-set -y --always-set maintenance_mode 1';
 # $options['shell-aliases']['online'] = 'variable-delete -y --exact maintenance_mode';
@@ -148,7 +148,8 @@ $options['shell-aliases']['wipe'] = 'cache-clear all';
  * database is rsync'ed to a remote system.  If a dump directory is not
  * specified, then 'sql-sync' will store dumps in temporary files.
  */
-# $options['dump-dir'] = '/path/to/dumpdir';
+// $options['dump-dir'] = '~/.drush/dumpdir';
+$command_specific['sql-sync'] = array('no-ordered-dump' => TRUE);
 
 /**
  * Specify the filename and path where 'sql-dump' should store backups of
@@ -166,10 +167,10 @@ $options['shell-aliases']['wipe'] = 'cache-clear all';
 
 // Notify user via Notification Center (OSX) or libnotify (Linux) when command
 // takes more than 30 seconds. See global options for more configuration.
-# $options['notify'] = 30;
+// $options['notify'] = 30;
 
 // Enable verbose mode.
-# $options['v'] = 1;
+// $options['v'] = 1;
 
 // Show database passwords in 'status' and 'sql-conf' commands.
 # $options['show-passwords'] = 1;
@@ -246,7 +247,7 @@ $options['shell-aliases']['wipe'] = 'cache-clear all';
  * commands when the "--structure-tables-key=common" option is provided.
  * You may add specific tables to the existing array or add a new element.
  */
-# $options['structure-tables']['common'] = array('cache', 'cache_*', 'history', 'search_*', 'sessions', 'watchdog');
+$options['structure-tables']['common'] = array('cache', 'cache_*', 'history', 'search_index', 'search_api_index', 'sessions', 'watchdog');
 
 /**
  * List of tables to be omitted entirely from SQL dumps made by the 'sql-dump'
@@ -286,7 +287,7 @@ $options['shell-aliases']['wipe'] = 'cache-clear all';
  */
 
 // Ensure all rsync commands use verbose output.
-# $command_specific['rsync'] = array('verbose' => TRUE);
+$command_specific['rsync'] = array('verbose' => TRUE);
 
 // Prevent drush ssh command from adding a cd to Drupal root before provided command.
 # $command_specific['ssh'] = array('cd' => FALSE);
@@ -300,7 +301,12 @@ $options['shell-aliases']['wipe'] = 'cache-clear all';
 # $command_specific['pm-updatecode'] = array('notes' => TRUE);
 
 // Set a predetermined username and password when using site-install.
-# $command_specific['site-install'] = array('account-name' => 'alice', 'account-pass' => 'secret');
+$command_specific['site-install'] = array(
+  'site-mail' => $_SERVER["ADMIN_EMAIL"],
+  'account-name' => $_SERVER["ADMIN_USER"],
+  'account-mail' => $_SERVER["ADMIN_EMAIL"],
+  'account-pass' => $_SERVER["ADMIN_PASS"],
+);
 
 /**
  * Load a drushrc file from the 'drush' folder at the root of the current

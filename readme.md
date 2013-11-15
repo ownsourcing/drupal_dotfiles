@@ -43,11 +43,13 @@ This file is ignored from the repository so that you can personalize your Termin
 ```bash
 #!/usr/bin/env bash
 
-# Define your Drupal root folder.
+# Default settings.
 DRUPAL_ROOT="$HOME/Sites/d7"
 MYSQL_USER="root"
 MYSQL_PASS="password"
-EMAIL="mail@example.com"
+ADMIN_USER="root"
+ADMIN_EMAIL="mail@example.com"
+ADMIN_PASS="password"
 ```
 ## Usage
 
