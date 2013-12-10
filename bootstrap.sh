@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 DOT_REPO="$(dirname "${BASH_SOURCE}")"
 
