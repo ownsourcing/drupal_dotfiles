@@ -18,6 +18,8 @@ alias oo="open ."
 alias dl=core-download
 alias up=core-update
 alias si=site-install
+alias cc=cache-clear
+alias sqls=sql-sync
 
 # # Project shortcuts
 # alias ap=add_project

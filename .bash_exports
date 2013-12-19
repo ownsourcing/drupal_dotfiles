@@ -23,7 +23,6 @@ export CLICOLOR=1
 export LSCOLORS=ExFxCxDxBxegedabagacad
 
 # Make our shell variable available for php
-export DRUPAL_ROOT
 export ADMIN_USER
 export ADMIN_EMAIL
 export ADMIN_PASS

@@ -303,9 +303,9 @@ $command_specific['rsync'] = array('verbose' => TRUE);
 // Set a predetermined username and password when using site-install.
 $command_specific['site-install'] = array(
   'site-mail' => $_SERVER["ADMIN_EMAIL"],
-  'account-name' => $_SERVER["ADMIN_USER"],
-  'account-mail' => $_SERVER["ADMIN_EMAIL"],
-  'account-pass' => $_SERVER["ADMIN_PASS"],
+  'account-name' => $_SERVER["DRUPAL_ADMIN_USER"],
+  'account-mail' => $_SERVER["DRUPAL_ADMIN_EMAIL"],
+  'account-pass' => $_SERVER["DRUPAL_ADMIN_PASS"],
 );
 
 /**
