@@ -1,18 +1,19 @@
 #!/bin/bash
 
 # Prints $1 nicely styled.
-function print()  { echo -e "\n\033[0;32m$1\033[0m" }
+function print() { echo -e "\n\033[0;32m$1\033[0m"; }
 
 # Prints $1 error styled.
-function error()  { echo -e "\n\033[0;31mERROR\033[0m: $1" && return 0 }
+function error() { echo -e "\n\033[0;31m[ERROR]\033[0m $1"; return 0; }
 
 # Writes $1 into $2.
-function write_to_file() { echo -e $1 >> $2 }
+function write_to_file() { echo -e $1 >> $2; }
 
 # Fetches options.
 function get_options() {
   version=$DRUPAL_VERSION_DEFAULT
   site="default"
+  [[ -f settings.php ]] && site=${PWD##*/}
 
   while getopts v:s: opt; do
     case $opt in
@@ -42,12 +43,10 @@ function core-download() {
   get_options "$@"
 
   if [ -d "$drupal_root" ]; then error "$drupal_root already exist"; fi
-  print "Downloading Drupal $version."
-  drush dl "drupal-$version" --destination="$DRUPAL_BASE_FOLDER" --drupal-project-rename="$version_key" -y
-  write_to_file "<?php\n\n\$uri = '$version_key';\n\n// Automatic multisiter\n\$site = new DirectoryIterator(__DIR__);\nwhile (\$site->valid()) {\n\t// Look for directories containing a 'settings.php' file\n\tif (\$site->isDir() && !\$site->isDot() && !\$site->isLink()) {\n\t\tif (file_exists(\$site->getPathname() . '/settings.php')) {\n\t\t\t// Add site alias\n\t\t\t\$basename = \$site->getBasename();\n\t\t\t\$sites[\$basename . '.' . \$uri] = \$basename;\n\t\t}\n\t}\n\t\$site->next();\n}" $drupal_root/sites/sites.php
-  drush dl devel potx coder -y
-
-  return 1
+  print "Downloading Drupal $version." && drush dl "drupal-$version" --destination="$DRUPAL_BASE_FOLDER" --drupal-project-rename="$version_key" -y
+  print "Create ($version) sites.php file." && write_to_file "<?php\n\n\$uri = '$version_key';\n\n// Automatic multisiter\n\$site = new DirectoryIterator(__DIR__);\nwhile (\$site->valid()) {\n\t// Look for directories containing a 'settings.php' file\n\tif (\$site->isDir() && !\$site->isDot() && !\$site->isLink()) {\n\t\tif (file_exists(\$site->getPathname() . '/settings.php')) {\n\t\t\t// Add site alias\n\t\t\t\$basename = \$site->getBasename();\n\t\t\t\$sites[\$basename . '.' . \$uri] = \$basename;\n\t\t}\n\t}\n\t\$site->next();\n}" $drupal_root/sites/sites.php
+  print "Download ($version) development modules." && drush dl devel potx coder -y
+  print "Create ($version) sublime project." && write_to_file "\n{\n\t\"folders\":\n\t[\n\t\t{\n\t\t\t\"path\": \"$drupal_root\"\n\t\t}\n\t]\n}" $drupal_root/$version_key.sublime-project
 }
 
 # Update the Drupal core.
@@ -55,29 +54,24 @@ function core-update() {
   get_options "$@"
 
   if [ ! -d "$drupal_root/sites/$site" ]; then error "Directory ($drupal_root/sites/$site) doesn't exist."; fi
-  print "Updating Drupal $version."
-  cd $drupal_root/sites/$site && drush up
-
-  return 1
+  print "Updating Drupal $version." && cd $drupal_root/sites/$site && drush up
 }
 
 # Install Drupal site.
 function site-install() {
   get_options "$@"
 
-  if [ -d "$drupal_root/sites/$site" ]; then; open http://$site.${version_key} && error "Directory ($drupal_root/sites/$site) already exist."; fi
+  if [ -d "$drupal_root/sites/$site" ]; then open http://$site.${version_key} && error "Directory ($drupal_root/sites/$site) already exist."; fi
   print "Install ($site) site in Drupal $version core."
-  mkdir -p $drupal_root/sites/$site/{libraries,modules/{contrib,custom/$custom_module,features},themes/{contrib,custom/$custom_theme/templates},files} && chmod -R o+w $drupal_root/sites/$site/files && cd $drupal_root/sites/$site
-  drush si --db-url=mysql://$MYSQL_USER:$MYSQL_PASS@localhost/$site_db_name --site-name=$site --sites-subdir=$site -y
-  chmod -R g+w $drupal_root/sites/$site/files/
-  drush vset file_public_path "sites/$site/files/public" && drush en devel potx coder update statistics simpletest -y
-  sudo sed -ie "\|^127.0.0.1 ${site}.${version_key}|d" /private/etc/hosts && sudo sh -c "echo 127.0.0.1 ${site}.${version_key} >> /private/etc/hosts"
-  write_to_file "name = ${module}\ndescription = Custom hooks, callbacks and code.\ncore = $version.x\npackage = ${site}\n" $drupal_root/sites/$site/modules/custom/$custom_module/$custom_module.info && write_to_file "<?php\n" $drupal_root/sites/$site/modules/custom/$custom_module/$custom_module.module && write_to_file "<?php\n" $drupal_root/sites/$site/modules/custom/$custom_module/$custom_module.install
-  write_to_file "name = ${theme}\ndescription = Custom ${theme} Theme\ncore = $version.x\n" $drupal_root/sites/$site/themes/custom/$custom_theme/$custom_theme.info && write_to_file "<?php\n" $drupal_root/sites/$site/themes/custom/$custom_theme/template.php
-  write_to_file "This file is intended to collect urls for patches, that you've applied in Drupal core / contrib modules." $drupal_root/sites/$site/PATCHES.txt
-  open http://$site.$version_key
-
-  return 1
+  print "Create ($site) folder structure." && mkdir -p $drupal_root/sites/$site/{libraries,modules/{contrib,custom/$custom_module,features},themes/{contrib,custom/$custom_theme/templates},files} && chmod -R o+w $drupal_root/sites/$site/files && cd $drupal_root/sites/$site
+  print "Install ($site) multisite." && drush si --db-url=mysql://$MYSQL_USER:$MYSQL_PASS@localhost/$site_db_name --site-name=$site --sites-subdir=$site -y
+  print "Set permissions of ($site) files folder" && chmod -R g+w $drupal_root/sites/$site/files/
+  print "Configure ($site) local / development." && drush vset file_public_path "sites/$site/files/public" && drush en devel potx coder update statistics simpletest -y
+  print "Add ($site.$version_key) to hosts." && sudo sed -ie "\|^127.0.0.1 ${site}.${version_key}|d" /private/etc/hosts && sudo sh -c "echo 127.0.0.1 ${site}.${version_key} >> /private/etc/hosts"
+  print "Create an initial ($custom_module) module." && write_to_file "name = ${module}\ndescription = Custom hooks, callbacks and code.\ncore = $version.x\npackage = ${site}\n" $drupal_root/sites/$site/modules/custom/$custom_module/$custom_module.info && write_to_file "<?php\n" $drupal_root/sites/$site/modules/custom/$custom_module/$custom_module.module && write_to_file "<?php\n" $drupal_root/sites/$site/modules/custom/$custom_module/$custom_module.install
+  print "Create an initial ($custom_theme) theme." && write_to_file "name = ${theme}\ndescription = Custom ${theme} Theme\ncore = $version.x\n" $drupal_root/sites/$site/themes/custom/$custom_theme/$custom_theme.info && write_to_file "<?php\n" $drupal_root/sites/$site/themes/custom/$custom_theme/template.php
+  print "Create an ($site) PATCHES.txt file." && write_to_file "This file is intended to collect urls for patches, that you've applied in Drupal core / contrib modules." $drupal_root/sites/$site/PATCHES.txt
+  print "Open ($site) in your default browser." && open http://$site.$version_key
 }
 
 # Trigger drush cache clear.
