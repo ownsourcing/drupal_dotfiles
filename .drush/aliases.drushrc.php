@@ -316,34 +316,66 @@
 #  );
 
 $aliases = array();
+$drupal_base_folder = $_SERVER['DRUPAL_BASE_FOLDER'];
 
 // Automatic alias for each Drupal site
-$site = new DirectoryIterator(__DIR__);
-while ($site->valid()) {
-  if ($site->isDir() && !$site->isDot() && !$site->isLink()) {
-    if (file_exists($site->getPathname() . '/settings.php')) {
-      $basename = $site->getBasename();
+$base_folder = new DirectoryIterator($drupal_base_folder);
+while ($base_folder->valid()) {
+  if ($base_folder->isDir() && !$base_folder->isDot() && !$base_folder->isLink()) {
+    $version_key = $base_folder->getBasename();
 
-      $aliases[$basename] = array(
-        'uri' => $basename,
-        'command-specific' => array(
-          'dl' => array(
-            'destination' => 'sites/' . $basename . '/modules/contrib'
-          )
-        ),
-      );
+    $site = new DirectoryIterator($drupal_base_folder . '/' . $version_key . '/sites');
+    while ($site->valid()) {
+      if ($site->isDir() && !$site->isDot() && !$site->isLink()) {
+        if (file_exists($site->getPathname() . '/settings.php')) {
+          $basename = $site->getBasename();
+
+          // Development stage.
+          $aliases[$version_key . '_' . $basename] = array(
+            'uri' => $basename,
+            'root' => $drupal_base_folder . '/' . $version_key,
+            'command-specific' => array('dl' => array('destination' => 'sites/' . $basename . '/modules/contrib')),
+            'path-aliases' => array('%files' => 'sites/' . $basename . '/files'),
+          );
+
+          // Testing stage.
+          // $aliases[$version_key . '_' . $basename . '_t'] = array(
+            // 'uri' => $basename . '.test.mycompany.nl',
+            // 'root' => '/var/www/drupal/' . $version_key . '/',
+            // 'remote-host' => 'test.mycompany.nl',
+            // 'path-aliases' => array('%files' => 'sites/' . $basename . '/files'),
+          // );
+
+          // Acceptance stage.
+          // $aliases[$version_key . '_' . $basename . '_a'] = array(
+            // 'uri' => $basename . '.acc.mycompany.nl',
+            // 'root' => '/var/www/drupal/' . $version_key . '/',
+            // 'remote-host' => 'acc.mycompany.nl',
+            // 'path-aliases' => array('%files' => 'sites/' . $basename . '/files'),
+          // );
+
+          // Production stage.
+          // $aliases[$version_key . '_' . $basename . '_p'] = array(
+            // 'uri' => $basename . '.prod.mycompany.nl',
+            // 'root' => '/var/www/drupal/' . $version_key . '/',
+            // 'remote-host' => 'prod.mycompany.nl',
+            // 'path-aliases' => array('%files' => 'sites/' . $basename . '/files'),
+          // );
+        }
+      }
+      $site->next();
     }
   }
-  $site->next();
+  $base_folder->next();
 }
 
-// Get all site aliases
-$all = array();
-foreach ($aliases as $name => $definition) {
-  $all[] = '@' . $name;
-}
+// // Get all site aliases
+// $all = array();
+// foreach ($aliases as $name => $definition) {
+//   $all[] = '@' . $name;
+// }
 
-// 'All' alias group
-$aliases['all'] = array(
-  'site-list' => $all,
-);
+// // 'All' alias group
+// $aliases['all'] = array(
+//   'site-list' => $all,
+// );

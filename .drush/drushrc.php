@@ -76,9 +76,9 @@
 # $options['shell-aliases']['pulldb'] = '!git pull && drush updatedb';
 # $options['shell-aliases']['noncore'] = 'pm-list --no-core';
 # $options['shell-aliases']['wipe'] = 'cache-clear all';
-# $options['shell-aliases']['unsuck'] = 'pm-disable -y overlay,dashboard';
-# $options['shell-aliases']['offline'] = 'variable-set -y --always-set maintenance_mode 1';
-# $options['shell-aliases']['online'] = 'variable-delete -y --exact maintenance_mode';
+$options['shell-aliases']['unsuck'] = 'pm-disable -y overlay,dashboard';
+$options['shell-aliases']['offline'] = 'variable-set -y --always-set maintenance_mode 1';
+$options['shell-aliases']['online'] = 'variable-delete -y --exact maintenance_mode';
 # $options['shell-aliases']['dis-all'] = '!drush -y dis `drush pml --status=enabled --type=module --no-core --pipe`';
 # $options['shell-aliases']['self-alias'] = 'site-alias @self --with-db --alias-name=new';
 # $options['shell-aliases']['site-get'] = '@none php-eval "return drush_sitealias_site_get();"';
@@ -105,8 +105,8 @@
  * maintainers use this data to learn which commands and options are most
  * See the usage-show and usage-send commands.
  */
-# $options['drush_usage_log'] = TRUE;
-# $options['drush_usage_send'] = TRUE;
+$options['drush_usage_log'] = TRUE;
+$options['drush_usage_send'] = TRUE;
 
 /**
  * By default, Drush will download projects compatible with the current
@@ -149,7 +149,7 @@
  * specified, then 'sql-sync' will store dumps in temporary files.
  */
 // $options['dump-dir'] = '~/.drush/dumpdir';
-$command_specific['sql-sync'] = array('no-ordered-dump' => TRUE);
+// $command_specific['sql-sync'] = array('no-ordered-dump' => TRUE);
 
 /**
  * Specify the filename and path where 'sql-dump' should store backups of
@@ -287,7 +287,7 @@ $options['structure-tables']['common'] = array('cache', 'cache_*', 'history', 's
  */
 
 // Ensure all rsync commands use verbose output.
-$command_specific['rsync'] = array('verbose' => TRUE);
+// $command_specific['rsync'] = array('verbose' => TRUE);
 
 // Prevent drush ssh command from adding a cd to Drupal root before provided command.
 # $command_specific['ssh'] = array('cd' => FALSE);

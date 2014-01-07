@@ -38,6 +38,9 @@ Thumbs.db
 files/
 settings.php
 sites.php
+sites
+!sites/all
+!sites/default
 
 # Drupal development modules
 devel
